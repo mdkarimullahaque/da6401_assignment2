@@ -1,4 +1,4 @@
-# DA6401 - Assignment 1
+# DA6401 - Assignment 2
 
 MD Karimulla Haque MA23C021
 
