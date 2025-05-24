@@ -1,64 +1,80 @@
-## Question 1:
-CNN Network code block - 
-```python
-    def _create_conv_layers(self):
-        layers = []
-        in_channels = self.input_shape[0]
-        out_channels = self.num_filters
+ Here we are implementing a CNN model on the  [iNaturalist dataset](https://storage.googleapis.com/wandb_datasets/nature_12K.zip) from scratch and tuned the hyperparameters to achieve optimal performance. I utilized Python along with required packages from PyTorch and Torchvision.
 
-        if self.filter_organization == 'double':
-            out_channels_list = [out_channels] + [out_channels * 2**i for i in range(1, 5)]
-        elif self.filter_organization == 'halve':
-            out_channels_list = [out_channels * 2**i for i in range(4, -1, -1)]
-        else:
-            out_channels_list = [out_channels] * 5
+ # Model Architecture
+Convolutional Layers: 5 layers with varying kernel sizes and filter organizations.
 
-        for out_channels in out_channels_list:
-            layers.append(nn.Conv2d(in_channels, out_channels, self.filter_size, padding='same'))
-            if self.batch_norm:
-                layers.append(nn.BatchNorm2d(out_channels))
-            layers.append(self.get_activation())
-            layers.append(nn.MaxPool2d(2))
-            in_channels = out_channels
+Batch normalisation in convolution and dense layers
 
-        return nn.Sequential(*layers)
+Activation: ReLU, GELU, SiLU, Mish (applied after each convolution layer).
 
-    def _create_dense_layers(self):
-        layers = [
-            nn.Flatten(),
-            nn.Linear(self.conv_output_size(), self.dense_neurons),
-            self.get_activation(),
-            nn.Dropout(self.dropout_rate),
-            nn.Linear(self.dense_neurons, self.num_classes)
-        ]
-        return nn.Sequential(*layers)
+Max-Pooling: Applied after each activation layer.
 
-```
-## Question 2:
-For wandb sweep configuration:
+Dropout in convolution and dense layers
 
-```python
-sweep_config = {
-    'method': 'random',  # Specify the search method
-    'parameters': {
-        'num_filters': {'values': [32, 64, 128]},
-        'activation': {'values': ['relu', 'gelu', 'silu', 'mish']},
-        'data_augmentation': {'values': [True, False]},
-        'batch_norm': {'values': [True, False]},
-        'dropout': {'values': [0.2, 0.3]},
-        'filter_organization': {'values': ['same', 'double', 'halve']}
-    }
-}
+Dense Layer: 1 dense layer with 128 or 256 neurons.
 
-```
+Output Layer: 10 neurons for 10 classes in the iNaturalist dataset.
 
-## Question 4:
-Best model configuration and stat:
+# Hyperparameters 
+Kernel Size (Size of Filters): [[3,3,3,3,3], [3,5,5,7,7], [7,7,5,5,3]]
 
-| dropout | filter_organization | num_filters | epoch | train_accuracy_epoch | train_accuracy_step | train_loss_epoch | train_loss_step | trainer/global_step | val_accuracy | val_loss | Test_Accuracy|
-|---------|---------------------|-------------|-------|----------------------|---------------------|------------------|-----------------|---------------------|--------------|----------|----------|
-| 0.3     | same                | 32          | 9     | 0.4874               | 0.5938              | 1.47             | 1.423           | 3129                | 0.426        | 1.673    | 0.3969|
+
+Dropout: [0.2, 0.3]
+
+
+Activation Function: ['ReLU', 'GELU', 'SiLU', 'Mish']
+
+
+Batch Normalization: [Yes, No]
+
+
+Filter Organization: [[32,32,32,32,32], [128, 128, 64, 64,32], [32, 64,128,256,512]]
 
 
 
+Data Augmentation:[Yes, No]
 
+Number of nodes in dense layer : [128, 256]
+
+
+# Training Process
+
+
+Split training data into 80:20 for training and validation.
+
+
+Use bayesian sweep feature from wandb for hyperparameter tuning.
+
+
+Selected best hyperparameter configuration based on validation accuracy.
+
+
+# Best Hyperparameters
+
+
+Kernel Size: [3,3,3,3,3]
+
+
+Dropout: 0.2
+
+
+Activation Function: Mish
+
+
+Batch Normalization: No
+
+
+Filter Organization: [32,32,32,32,32]
+
+
+Data Augmentation: No
+
+
+Neurons in Dense Layer: 256
+
+
+# Model Evaluation
+Tested the best model on the test data.
+
+
+Reported accuracy on the test set.
